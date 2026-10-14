@@ -8,6 +8,10 @@ import io
 st.set_page_config(page_title="App con Pizarra", layout="wide")
 st.title("🎨 Mi App con Pizarra")
 
+# -------- Inicializar clave única del canvas --------
+if "canvas_key" not in st.session_state:
+    st.session_state.canvas_key = 0
+
 # -------- Sección: Saludo --------
 nombre = st.text_input("Escribe tu nombre:")
 if st.button("Saludar"):
@@ -33,6 +37,11 @@ with col1:
     )
     realtime_update = st.checkbox("Actualización en tiempo real", True)
 
+    # Botón para limpiar la pizarra: cambia la key para forzar un canvas nuevo
+    if st.button("🧹 Limpiar pizarra"):
+        st.session_state.canvas_key += 1
+        st.rerun()
+
 with col2:
     canvas_result = st_canvas(
         fill_color="rgba(255, 165, 0, 0.3)",
@@ -42,9 +51,9 @@ with col2:
         height=400,
         width=700,
         drawing_mode=drawing_mode,
-        key="canvas",
+        key=f"canvas_{st.session_state.canvas_key}",   # 👈 key dinámica
         update_streamlit=realtime_update,
-        return_image_data=True,   # 👈 Necesario en v0.10.0+
+        return_image_data=True,
     )
 
 # -------- Guardar / Descargar imagen --------
@@ -62,8 +71,3 @@ if canvas_result.image_data is not None:
         mime="image/png",
     )
     st.image(img, caption="Vista previa", use_column_width=True)
-
-# -------- Limpiar pizarra --------
-if st.button("🧹 Limpiar pizarra"):
-    st.session_state["canvas"] = None
-    st.rerun()
