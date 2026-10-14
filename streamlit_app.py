@@ -1,8 +1,10 @@
 import streamlit as st
 from streamlit_drawable_canvas import st_canvas
 from PIL import Image
+import numpy as np
 import io
 
+# -------- Configuración de página --------
 st.set_page_config(page_title="App con Pizarra", layout="wide")
 st.title("🎨 Mi App con Pizarra")
 
@@ -42,13 +44,17 @@ with col2:
         drawing_mode=drawing_mode,
         key="canvas",
         update_streamlit=realtime_update,
+        return_image_data=True,   # 👈 Necesario en v0.10.0+
     )
 
 # -------- Guardar / Descargar imagen --------
 if canvas_result.image_data is not None:
-    img = Image.fromarray(canvas_result.image_data.astype("uint8"), "RGBA")
+    img_array = canvas_result.image_data.astype("uint8")
+    img = Image.fromarray(img_array, "RGBA")
+
     buf = io.BytesIO()
     img.save(buf, format="PNG")
+
     st.download_button(
         "⬇️ Descargar dibujo (PNG)",
         data=buf.getvalue(),
